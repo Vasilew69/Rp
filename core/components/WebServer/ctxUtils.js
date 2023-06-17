@@ -131,7 +131,7 @@ async function renderLoginView(data, txVars) {
     try {
         out = await loadWebTemplate('standalone/login').then(template => template(data));
     } catch (error) {
-        console.error(error);
+        console.dir(error);
         out = getRenderErrorText('Login', error, data);
     }
 
@@ -171,6 +171,9 @@ function logAction(ctx, action) {
 function hasPermission(ctx, perm) {
     try {
         const sess = ctx.nuiSession ?? ctx.session;
+        if (perm === 'master') {
+            return sess.auth.master === true;
+        }
         return (
             sess.auth.master === true
             || sess.auth.permissions.includes('all_permissions')
