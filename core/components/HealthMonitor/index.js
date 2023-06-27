@@ -90,7 +90,7 @@ export default class HealthMonitor {
     setCurrentStatus(newStatus) {
         if(newStatus !== this.currentStatus){
             this.currentStatus = newStatus;
-            globals.discordBot.updateStatus().catch();
+            globals.discordBot.updateStatus().catch((e) => {});
             globals.webServer?.webSocket.pushRefresh('status');
         }
     }
@@ -124,9 +124,13 @@ export default class HealthMonitor {
         let dynamicResp;
         const requestOptions = {
             url: `http://${globals.fxRunner.fxServerHost}/dynamic.json`,
-            timeout: this.hardConfigs.timeout,
             maxRedirects: 0,
-            retry: { limit: 0 },
+            timeout: {
+                request: this.hardConfigs.timeout
+            },
+            retry: {
+                limit: 0
+            },
         };
         try {
             const data = await got.get(requestOptions).json();

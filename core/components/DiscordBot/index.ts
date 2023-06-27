@@ -54,19 +54,29 @@ export default class DiscordBot {
     guild: Discord.Guild | undefined;
     guildName: string | undefined;
     announceChannel: Discord.TextBasedChannel | undefined;
+    lastDisallowedIntentsError: number = 0;
 
 
     constructor(txAdmin: TxAdmin, public config: DiscordBotConfigType) {
         this.#txAdmin = txAdmin;
 
         if (this.config.enabled) {
-            this.startBot().catch(() => { });
+            this.startBot().catch((e) => {});
         }
+
+        // FIXME: Hacky solution to fix the issue with disallowed intents
+        // Remove this when issue below is fixed 
+        // https://github.com/discordjs/discord.js/issues/9621
+        process.on('unhandledRejection', (error: Error) => {
+            if (error.message === 'Used disallowed intents') {
+                this.lastDisallowedIntentsError = Date.now();
+            }
+        });
 
         //Cron
         setInterval(() => {
             if (this.config.enabled) {
-                this.updateStatus().catch();
+                this.updateStatus().catch((e) => {});
             }
         }, 60_000)
     }
@@ -197,6 +207,11 @@ export default class DiscordBot {
                 console.error(msg);
                 const e = new Error(msg);
                 Object.assign(e, data);
+                console.warn('Stopping Discord Bot');
+                this.#client?.destroy();
+                setImmediate(() => {
+                    this.#client = undefined;
+                });
                 return reject(e);
             }
 
@@ -214,8 +229,22 @@ export default class DiscordBot {
             //Setting up client object
             this.#client = new Client(this.#clientOptions);
 
+            //Setup disallowed intents unhandled rejection watcher
+            const lastKnownDisallowedIntentsError = this.lastDisallowedIntentsError;
+            const disallowedIntentsWatcherId = setInterval(() => {
+                if (this.lastDisallowedIntentsError !== lastKnownDisallowedIntentsError) {
+                    clearInterval(disallowedIntentsWatcherId);
+                    return sendError(
+                        `This bot does not have a required privileged intent.`,
+                        { code: 'DisallowedIntents' }
+                    );
+                }
+            }, 250);
+
+
             //Setup Ready listener
             this.#client.on('ready', async () => {
+                clearInterval(disallowedIntentsWatcherId);
                 if (!this.#client?.isReady() || !this.#client.user) throw new Error(`ready event while not being ready`);
 
                 //Fetching guild
@@ -272,34 +301,39 @@ export default class DiscordBot {
                     if (!fetchedChannel) {
                         return sendError(`Channel ${this.config.announceChannel} not found.`);
                     } else if (fetchedChannel.type !== ChannelType.GuildText && fetchedChannel.type !== ChannelType.GuildAnnouncement) {
-                        return sendError(`Channel ${this.config.announceChannel} - ${(fetchedChannel as any)?.name} is not a text or annoucement channel.`);
+                        return sendError(`Channel ${this.config.announceChannel} - ${(fetchedChannel as any)?.name} is not a text or announcement channel.`);
                     } else {
                         this.announceChannel = fetchedChannel;
                     }
                 }
 
-                this.guild.commands.set(slashCommands);
-                this.#client.application?.commands.set([]); //if previously registered by tx before v6 or other bot
-                console.ok(`Started and logged in as '${this.#client.user.tag}'`);
-                this.updateStatus().catch();
 
+                // if previously registered by tx before v6 or other bot
+                this.guild.commands.set(slashCommands).catch(console.error);
+                this.#client.application?.commands.set([]).catch(console.error);
+
+                this.updateStatus().catch((e) => {});
+
+                console.ok(`Started and logged in as '${this.#client.user.tag}'`);
                 return resolve();
             });
 
             //Setup remaining event listeners
             this.#client.on('error', (error) => {
+                clearInterval(disallowedIntentsWatcherId);
                 console.error(`Error from Discord.js client: ${error.message}`);
                 return reject(error);
             });
             this.#client.on('resume', () => {
                 console.verbose.ok('Connection with Discord API server resumed');
-                this.updateStatus().catch();
+                this.updateStatus().catch((e) => {});
             });
             this.#client.on('interactionCreate', interactionCreateHandler.bind(null, this.#txAdmin));
             // this.#client.on('debug', console.verbose.debug);
 
             //Start bot
             this.#client.login(this.config.token).catch((error) => {
+                clearInterval(disallowedIntentsWatcherId);
                 console.error(`Discord login failed with error: ${(error as Error).message}`);
                 return reject(error);
             });

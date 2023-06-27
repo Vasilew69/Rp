@@ -48,7 +48,7 @@ let hostStaticDataCache: HostStaticDataType;
 
 //Pre-calculate static data
 setTimeout(() => {
-    getHostData().catch();
+    getHostData().catch((e) => {});
 }, 10_000);
 
 
@@ -128,7 +128,9 @@ export const getFXServerData = async () => {
     const requestOptions = {
         url: `http://${fxRunner.fxServerHost}/info.json`,
         maxRedirects: 0,
-        timeout: healthMonitor.hardConfigs.timeout,
+        timeout: {
+            request: healthMonitor.hardConfigs.timeout
+        },
         retry: { limit: 0 },
     };
 
