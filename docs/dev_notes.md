@@ -3,19 +3,45 @@
 - [x] fix handling of disallowed intents
 - [x] improve the bot with dangerous permissions and missing access messages
 - [x] attempt to update mysql2 and got
-- [ ] merge PRs
-- [ ] disable whitelist page when server is not on license whitelist mode
+- [x] discord bot: improve handling of checkJoin api fetches
+- [x] add txAdmin:events:adminAuth
+- [x] merge PRs
+- [x] add warning to whitelist page when server is not on license whitelist mode
+- [x] deprecate globals.databus
 
 > next up
-- [ ] check if the custom unhandledRejection thing has been added to fxserver
 - [ ] Add a tracking for % of redm/fivem/libertym servers to txTracker
-- [ ] clean a few of the dead stuff from databus
-- [ ] improve `DiscordBot.resolveMemberRoles()` cache handling
 - [ ] maybe add some debug logging to `AdminVault.checkAdminsFile()`, to find out why so many people are having issues with their logins
     - maybe even add to the login failed page something like "admin file was reset or modified XXX time ago"
-- [ ] remove old databus.txStatsData stuff
-- [ ] QuantileArrayOutput for time stuff - use q5/q95 to help me define the buckets
+- [ ] Use q5/q95 from QuantileArrayOutput to help me define the buckets, then implement the join check time histogram
 - [ ] xxxxxx
+
+
+### Server resource scanner
+ScanResourceRoot('E:/FiveM/txData/default.base/', (data: object) => {
+    console.dir(data);
+})
+
+
+### Zod error parsing
+if (error instanceof z.ZodError) {
+    const outString = error.issues.map(issue => {
+        return issue.path.length
+            ? `${issue.path.join('.')}: ${issue.message}`
+            : issue.message;
+    }).join('\n');
+    console.error(outString);
+    console.error(error.issues);
+} else {
+    console.dir(error);
+}
+
+
+
+txAdmin:events:menuAction
+- player: number
+- action: string
+- data?: object
 
 
 
@@ -64,28 +90,6 @@ tar xvf fx.tar.xz
 })()
 
 
-=======================================================================
-
-
-## Optional
-- [ ] bot: fix http agent options for localAddress
-- [ ] bot: add rate limit events to diagnostics page
-- [ ] update readme with new features and contributing warning
-
-
-
-# Next up:
-- [ ] xxxxxx
-
-
-
-### Server resource scanner
-ScanResourceRoot('C:/whatever/resources/', data => {
-    const fs = require('fs');
-    fs.writeFileSync('L:/tmp/ugh.json', JSON.stringify(data));
-})
-
-
 
 =======================================================================
 
@@ -103,7 +107,7 @@ teste:
 - [ ] maybe some sort of lockfile to admins.json file which would disable admin manager?
 
 
-----------------------------------------------------
+=======================================================================
 
 
 
@@ -118,8 +122,8 @@ background-position: right 15px bottom 15px;
 //Resource didn't finish starting (if res boot still active)
 `resource "${starting.startingResName}" failed to start within the [120~600]s time limit`
 
-//Resources started, but no heartbeat whithin limit after that
-`server failed to start within time limit - 30s after last resource started`
+//Resources started, but no heartbeat within limit after that
+`server failed to start within time limit - 45s after last resource started`
 
 //No resource started starting, hb over limit
 `server failed to start within time limit - ${this.hardConfigs.heartBeat.failLimit}s, no onResourceStarting received`
@@ -132,7 +136,7 @@ background-position: right 15px bottom 15px;
 'server hang detected'
 ```
 
-----------------------------------------------------
+=======================================================================
 
 ## New pages:
 Overview:
@@ -149,14 +153,14 @@ History:
 - filter by action type
 - filter by admin, and hotlink it from the admins page
 
-Whitelist Page/routes:
-- show pre approvals and requests in two tables
-- Routes:
-    - get returns
-        - whitelistRequests[]
-        - whitelistApprovals[]
-    - whitelistApprovals (add/remove)
-    - whitelistRequests (approve/deny)
+Whitelist:
+- maybe remove the wl pending join table
+- maybe make a "latest whitelists" showing both pending and members (query players + pending and join tables)
+- don't forget to keep the "add approval" button
+
+CFG Editor:
+- multiple cfg editors
+- add backup file to txdata, with the last 100 changes, name of the admin and timestamp
 
 
 
@@ -350,6 +354,8 @@ https://immerjs.github.io/immer/ maybe?
 if tailwind, check https://daisyui.com/docs/themes/
 https://ui.shadcn.com/
 https://huemint.com/website-2/
+
+https://youtu.be/MnpuK0MK4yo
 
 
 ### Update Event + Rollout strategy
