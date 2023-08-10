@@ -140,7 +140,9 @@ export default async function SendDiagnosticsReport(ctx: Context) {
 
     // //Preparing request
     const requestOptions = {
-        url: `http://127.0.0.1:8121/public/`,
+        //url: `https://txapi.cfx-services.net/public/submit`,
+        //url: `http://127.0.0.1:8121/public/`,
+        url: `http://127.0.0.1:5000/public/submit`,
         retry: { limit: 1 },
         json: reportData,
     };
