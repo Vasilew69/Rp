@@ -2,6 +2,9 @@
 	<h1 align="center">
 		txAdmin for FiveM
 	</h1>
+	<h2 align="center">
+	    This is made by Vasilew
+	</h2>
 	<p align="center">
 		<img width="420" height="237" src="docs/banner.png">
 	</p>
