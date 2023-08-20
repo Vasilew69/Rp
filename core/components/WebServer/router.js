@@ -101,7 +101,6 @@ export default (config) => {
     router.get('/serverLog/partial', requestAuth('api'), webRoutes.serverLogPartial);
     router.get('/chartData/:thread?', chartDataLimiter, webRoutes.chartData);
     router.post('/database/:action', requestAuth('api'), webRoutes.databaseActions);
-    router.get('/intercom' ,requestAuth('web'), webRoutes.intercom)
 
     /*
         FIXME: reorganizar TODAS rotas de logs, incluindo listagem e download
@@ -124,7 +123,6 @@ export default (config) => {
     //Index & generic
     router.get('/resources', requestAuth('web'), webRoutes.resources);
     router.get('/', requestAuth('web'), webRoutes.dashboard);
-    router.get('/controlcenter', requestAuth('web'), webRoutes.controlCenter);
 
     //NUI specific routes
     router.get('/nui/auth', requestAuth('nui'), webRoutes.auth_nui);
@@ -146,9 +144,9 @@ export default (config) => {
     };
 
     //Insights page mock
-    router.get('/insights', (ctx) => {
-     return ctx.utils.render('main/insights', { headerTitle: 'Insights' });
-    });
+    // router.get('/insights', (ctx) => {
+    //     return ctx.utils.render('main/insights', { headerTitle: 'Insights' });
+    // });
 
     //Return router
     return router;

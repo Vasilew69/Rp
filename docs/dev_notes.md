@@ -1,5 +1,5 @@
 # TODO:
-- [ ] add `cache-control` and/or `vary` to all pages
+- [ ] xxx
 
 > next up
 - [ ] Add a tracking for % of redm/fivem/libertym servers to txTracker

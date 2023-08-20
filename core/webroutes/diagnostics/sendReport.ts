@@ -140,29 +140,28 @@ export default async function SendDiagnosticsReport(ctx: Context) {
 
     // //Preparing request
     const requestOptions = {
-        //url: `https://txapi.cfx-services.net/public/submit`,
-        //url: `http://127.0.0.1:8121/public/`,
-        url: `http://127.0.0.1:5000/public/submit`,
+        url: `https://txapi.cfx-services.net/public/submit`,
+        // url: `http://127.0.0.1:8121/public/submit`,
         retry: { limit: 1 },
         json: reportData,
     };
 
     //Making HTTP Request
     try {
-        type ResponseType = { Id: string } | { error: string, message?: string };
+        type ResponseType = { reportId: string } | { error: string, message?: string };
         const apiResp = await got.post(requestOptions).json() as ResponseType;
-        if ('Id' in apiResp) {
-            reportIdCache.get(apiResp.Id);
-            console.warn(`Diagnostics data report ID ${apiResp.Id} sent by ${ctx.session.auth.username}`);
-            return sendTypedResp({ Id: apiResp.Id });
+        if ('reportId' in apiResp) {
+            reportIdCache.set(apiResp.reportId);
+            console.warn(`Diagnostics data report ID ${apiResp.reportId} sent by ${ctx.session.auth.username}`);
+            return sendTypedResp({ reportId: apiResp.reportId });
         } else {
             console.verbose.dir(apiResp);
-            return sendTypedResp({ error: `Report failed: ${apiResp.error}` });
+            return sendTypedResp({ error: `Report failed: ${apiResp.message ?? apiResp.error}` });
         }
     } catch (error) {
         try {
             const apiErrorResp = JSON.parse(error?.response?.body);
-            console.dir(apiErrorResp); //DEBUG
+            // console.dir(apiErrorResp); //DEBUG
             const reason = apiErrorResp.message ?? apiErrorResp.error ?? (error as Error).message;
             return sendTypedResp({ error: `Report failed: ${reason}` });
         } catch (error2) {

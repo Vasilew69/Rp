@@ -1,6 +1,5 @@
 export default {
-    
-    fxserverPath: 'C:\\Users\\Administrator\\Documents\\server\\fxserver.exe',
+    fxserverPath: 'E:\\FiveM\\6520\\fxserver.exe',
     debouncerInterval: 250,
     preReleaseExpirationDays: 21,
     txAdminArgs: [

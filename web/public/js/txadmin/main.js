@@ -18,7 +18,6 @@ const faviconEl = document.getElementById('favicon');
 const statusCard = {
     self: document.getElementById('status-card'),
     discord: document.getElementById('status-discord'),
-    members: document.getElementById('status-discord-members'),
     server: document.getElementById('status-server'),
     serverProcess: document.getElementById('status-serverProcess'),
     nextRestartTime: document.getElementById('status-nextRestartTime'),

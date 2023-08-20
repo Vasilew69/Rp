@@ -67,7 +67,7 @@ export default class UpdateChecker {
             //perform request - cache busting every ~1.4h
             const osTypeApiUrl = (txEnv.isWindows) ? 'win32' : 'linux';
             const cacheBuster = Math.floor(Date.now() / 5_000_000);
-            const reqUrl = `http://localhost:5000/api/changelog/versions/${osTypeApiUrl}/server?${cacheBuster}`;
+            const reqUrl = `https://changelogs-live.fivem.net/api/changelog/versions/${osTypeApiUrl}/server?${cacheBuster}`;
             const resp = await got(reqUrl).json()
             apiResponse = changelogRespSchema.parse(resp);
         } catch (error) {

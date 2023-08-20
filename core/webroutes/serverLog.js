@@ -11,6 +11,5 @@ export default async function ServerLog(ctx) {
     const renderData = {
         headerTitle: 'Server Log',
     };
-    
     return ctx.utils.render('main/serverLog', renderData);
 };
