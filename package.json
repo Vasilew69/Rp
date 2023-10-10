@@ -100,7 +100,7 @@
     "unicode-emoji-json": "^0.4.0",
     "windows-release": "^4.0.0",
     "xss": "^1.0.14",
-    "zod": "^3.21.4"
+    "zod": "^3.22.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.6",
